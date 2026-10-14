@@ -50,13 +50,13 @@ pip install -r requirements.txt
 
 ## 配置 API Key
 
-`ai/` 里的脚本从**环境变量**读取密钥，代码里不写任何密钥：
+脚本从**环境变量或 Streamlit Secrets** 读取密钥，代码里不写任何密钥：
 
 ```powershell
-# 只在当前窗口有效
+# 本地开发：临时生效
 $env:DEEPSEEK_API_KEY = "你的key"
 
-# 永久生效（设置完要重开终端）
+# 本地开发：永久生效（设置完要重开终端）
 setx DEEPSEEK_API_KEY "你的key"
 ```
 
@@ -77,12 +77,35 @@ streamlit run streamlit入门.py
 python deepseek测试.py
 ```
 
-注意：脚本里用的是相对路径 `./resource/蛋.jpg`，所以要在 `ai/` 目录下启动，
-否则 logo 会加载失败。
+## 部署到公网（让别人用网址体验）
+
+用 [Streamlit Community Cloud](https://share.streamlit.io)，免费，直接从 GitHub 仓库部署：
+
+1. 确认这个仓库是**公开**的。
+2. 打开 <https://share.streamlit.io>，用 GitHub 账号登录，点 **Create app** → **Yup, I have an app**。
+3. 填写：
+   - Repository：`sleepgodfangxixi/ai_python_study`
+   - Branch：`main`
+   - Main file path：`ai/ai_parter_1.py`
+4. 展开 **Advanced settings**，在 **Secrets** 里粘贴（TOML 格式）：
+
+   ```toml
+   DEEPSEEK_API_KEY = "sk-你的key"
+   ```
+
+5. 点 **Deploy**。等几分钟，就能拿到形如
+   `https://xxx.streamlit.app` 的网址，发给任何人都能打开。
+
+⚠️ **注意费用**：应用是公开的，但用的是**你自己的 API Key**，
+所以别人聊天消耗的是你的余额。建议在 DeepSeek 平台只充少量金额，并定期看一眼用量。
+
+密钥只存在 Streamlit 的服务器上，不会进仓库——`.streamlit/secrets.toml`
+已经写进 `.gitignore`。
 
 ## 说明
 
 - `ai/` 使用 `openai` 库，通过 `base_url="https://api.deepseek.com"` 指向 DeepSeek。
-  它的接口与 OpenAI 兼容，所以换模型只要改 `model=` 那一个参数。
+  它的接口与 OpenAI 兼容，所以换模型只要改 `model=` 那一个参数
+  （`deepseek-flash` 是官方模型名，另有 `deepseek-v4-pro`）。
 - `lei/` 是纯 Python，不依赖第三方库，直接 `python 文件名.py` 就能运行。
 - Windows 上的环境坑（编码、GitHub 加速器证书）都记在 [NOTES.md](NOTES.md) 里。
