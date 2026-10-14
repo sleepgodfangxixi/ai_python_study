@@ -14,9 +14,8 @@ def get_api_key():
         pass  # 本地没有 .streamlit/secrets.toml 时会走到这里
     return os.environ.get("DEEPSEEK_API_KEY")
 
-st.title('AI智能伴侣')
 
-st.set_page_config(
+st.set_page_config(          # ← 必须是第一个 st.* 命令，不能挪到它前面去
     page_title="AI智能伴侣",
     page_icon="🐣",
     layout="wide",
@@ -38,23 +37,21 @@ client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 #系统提示词
 system_prompt = "你是一个温柔的AI助手，你叫蛋蛋，对待用户的问题必须温柔的回答"
 
+#页面标题：放在 set_page_config 之后、聊天记录之前，这样它永远在顶部
+st.title('AI智能伴侣')
+
+# 用脚本所在目录定位图片，这样在哪个目录启动都不会找不到
+logo_path = Path(__file__).resolve().parent / "resource" / "蛋.jpg"
+if logo_path.exists():
+    st.logo(str(logo_path))
+
 #初始化聊天信息
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
 #展示聊天信息
 for message in st.session_state.messages:
-    if message["role"] == "user":
-        st.chat_message("user").write(message["content"])
-    else:
-        st.chat_message("assistant").write(message["content"])
-
-
-
-# 用脚本所在目录定位图片，这样在哪个目录启动都不会找不到
-logo_path = Path(__file__).resolve().parent / "resource" / "蛋.jpg"
-if logo_path.exists():
-    st.logo(str(logo_path))
+    st.chat_message(message["role"]).write(message["content"])
 
 prompt = st.chat_input("快来和我聊天吧!")
 if prompt:
@@ -66,10 +63,9 @@ if prompt:
 #调用大模型
     response = client.chat.completions.create(
         model="deepseek-flash",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt},
-        ],
+        # 把 system + 整段历史一起发给模型，否则它会"忘记"前面聊过什么
+        messages=[{"role": "system", "content": system_prompt}]
+                 + st.session_state.messages,
         stream=False,
         reasoning_effort="high",
         extra_body={"thinking": {"type": "enabled"}}
