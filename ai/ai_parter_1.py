@@ -14,6 +14,7 @@ def get_api_key():
         pass  # 本地没有 .streamlit/secrets.toml 时会走到这里
     return os.environ.get("DEEPSEEK_API_KEY")
 
+st.title('AI智能伴侣')
 
 st.set_page_config(
     page_title="AI智能伴侣",
@@ -31,13 +32,24 @@ api_key = get_api_key()
 if not api_key:
     st.error("没有找到 DEEPSEEK_API_KEY。本地：设置环境变量；云端：在 Streamlit 的 Secrets 里配置。")
     st.stop()
-
+#创建与AI大模型交互的客户端对象
 client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
 #系统提示词
 system_prompt = "你是一个温柔的AI助手，你叫蛋蛋，对待用户的问题必须温柔的回答"
 
-st.title('AI智能伴侣')
+#初始化聊天信息
+if 'messages' not in st.session_state:
+    st.session_state.messages = []
+
+#展示聊天信息
+for message in st.session_state.messages:
+    if message["role"] == "user":
+        st.chat_message("user").write(message["content"])
+    else:
+        st.chat_message("assistant").write(message["content"])
+
+
 
 # 用脚本所在目录定位图片，这样在哪个目录启动都不会找不到
 logo_path = Path(__file__).resolve().parent / "resource" / "蛋.jpg"
@@ -48,6 +60,8 @@ prompt = st.chat_input("快来和我聊天吧!")
 if prompt:
     st.chat_message('user').write(prompt)
     print(f'------------------->调用AI大模型，提示词：{prompt}')
+    #将用户提示词添加到聊天信息中
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
 #调用大模型
     response = client.chat.completions.create(
@@ -63,3 +77,4 @@ if prompt:
     print(f'------------------->大模型返回结果：{response.choices[0].message.content}')
     #大模型返回的结果
     st.chat_message('assistant').write(response.choices[0].message.content)
+    st.session_state.messages.append({"role": "assistant", "content": response.choices[0].message.content})
