@@ -1,4 +1,4 @@
-# 直接依赖（其余包由它们自动带入）
-# 版本为本机 .venv 中实际验证可用的版本
+# Direct dependencies (other packages are pulled in automatically)
+# Pinned to the versions verified in my local .venv
 streamlit==1.65.0
 openai==3.28.0
