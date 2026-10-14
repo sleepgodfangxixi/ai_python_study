@@ -1,0 +1,28 @@
+# Python 虚拟环境
+.venv/
+venv/
+env/
+
+# PyCharm/JetBrains IDE
+.idea/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# 环境变量
+.env
+.env.local
+
+# 日志文件
+*.log
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
