@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import streamlit as st
+
 from openai import OpenAI
 
 
@@ -35,7 +36,7 @@ if not api_key:
 client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
 #系统提示词
-system_prompt = "你是一个温柔的AI助手，你叫蛋蛋，对待用户的问题必须温柔的回答"
+system_prompt = "你是一个温柔的AI助手，你叫%s，对待用户的问题必须%s的回答"
 
 #页面标题：放在 set_page_config 之后、聊天记录之前，这样它永远在顶部
 st.title('AI智能伴侣')
@@ -48,10 +49,30 @@ if logo_path.exists():
 #初始化聊天信息
 if 'messages' not in st.session_state:
     st.session_state.messages = []
+if 'ai_name' not in st.session_state:
+    st.session_state.ai_name = '蛋蛋'
+if 'ai_nature' not in st.session_state:
+    st.session_state.ai_nature = '温柔'
 
 #展示聊天信息
 for message in st.session_state.messages:
     st.chat_message(message["role"]).write(message["content"])
+
+
+
+with st.sidebar:
+    st.subheader("ai配置")
+
+    ai_name=st.text_input('昵称',placeholder='请输入昵称',value='蛋蛋')
+    if ai_name:
+        st.session_state.ai_name = ai_name
+
+    ai_nature=st.text_area('性格',placeholder='请输入性格',value='温柔')
+    if ai_nature:
+        st.session_state.ai_nature = ai_nature
+
+
+
 
 prompt = st.chat_input("快来和我聊天吧!")
 if prompt:
@@ -64,7 +85,7 @@ if prompt:
     response = client.chat.completions.create(
         model="deepseek-flash",
         # 把 system + 整段历史一起发给模型，否则它会"忘记"前面聊过什么
-        messages=[{"role": "system", "content": system_prompt},
+        messages=[{"role": "system", "content": system_prompt %(st.session_state.ai_name, st.session_state.ai_nature)},
                   *st.session_state.messages
                 ],
         stream=True,
@@ -75,8 +96,10 @@ if prompt:
     #大模型返回的结果(非流式输出的解决方式)
     # print(f'------------------->大模型返回结果：{response.choices[0].message.content}')
     # st.chat_message('assistant').write(response.choices[0].message.content)
+
     response_message=st.empty()
     response_message.caption('思考中.....')
+
     full_response=""
     # 大模型返回的结果(流式输出的解决方式)
     for chunk in response:
