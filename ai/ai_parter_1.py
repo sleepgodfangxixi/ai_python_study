@@ -76,6 +76,7 @@ if prompt:
     # print(f'------------------->大模型返回结果：{response.choices[0].message.content}')
     # st.chat_message('assistant').write(response.choices[0].message.content)
     response_message=st.empty()
+    response_message.caption('思考中.....')
     full_response=""
     # 大模型返回的结果(流式输出的解决方式)
     for chunk in response:
