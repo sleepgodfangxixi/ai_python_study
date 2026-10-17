@@ -64,13 +64,25 @@ if prompt:
     response = client.chat.completions.create(
         model="deepseek-flash",
         # 把 system + 整段历史一起发给模型，否则它会"忘记"前面聊过什么
-        messages=[{"role": "system", "content": system_prompt}]
-                 + st.session_state.messages,
-        stream=False,
+        messages=[{"role": "system", "content": system_prompt},
+                  *st.session_state.messages
+                ],
+        stream=True,
         reasoning_effort="high",
         extra_body={"thinking": {"type": "enabled"}}
     )
-    print(f'------------------->大模型返回结果：{response.choices[0].message.content}')
-    #大模型返回的结果
-    st.chat_message('assistant').write(response.choices[0].message.content)
-    st.session_state.messages.append({"role": "assistant", "content": response.choices[0].message.content})
+
+    #大模型返回的结果(非流式输出的解决方式)
+    # print(f'------------------->大模型返回结果：{response.choices[0].message.content}')
+    # st.chat_message('assistant').write(response.choices[0].message.content)
+    response_message=st.empty()
+    full_response=""
+    # 大模型返回的结果(流式输出的解决方式)
+    for chunk in response:
+        if chunk.choices[0].delta.content is not None:
+            full_response+=chunk.choices[0].delta.content
+            response_message.chat_message('assistant').write(full_response)
+    print(f'------------------->大模型返回结果：{full_response}')
+
+    # #将AI返回的结果添加到聊天信息中
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
