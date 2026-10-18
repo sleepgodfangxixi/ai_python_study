@@ -3,3 +3,9 @@
 __pycache__/
 *.pyc
 .streamlit/secrets.toml
+
+# 脚本生成的产物，不进仓库
+ai/resource/user.json
+
+# 以后做「历史会话」功能时的本地数据，也绝不进仓库
+history.json
