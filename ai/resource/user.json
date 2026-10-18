@@ -1,0 +1,10 @@
+{
+  "name": "壳子",
+  "age": 18,
+  "gender": "男",
+  "hobby": [
+    "coding",
+    "gaming",
+    "reading"
+  ]
+}
